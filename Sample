@@ -1,0 +1,47 @@
+from web3 import Web3
+from flashbots import FlashbotsBundleProvider
+
+# Set your Ethereum node URL
+ethereum_node_url = "YOUR_ETHEREUM_NODE_URL"
+
+# Set your Flashbots relay URL
+flashbots_relay_url = "https://relay.flashbots.net/"
+
+# Set your wallet private key and target address
+wallet_private_key = "YOUR_WALLET_PRIVATE_KEY"
+target_address = "TARGET_ADDRESS"
+
+# Set gas price and nonce for your transactions
+gas_price = 100  # Adjust this according to the current gas prices
+nonce = 0  # Start with nonce 0, increment for each new transaction
+
+# Instantiate Web3 and connect to your Ethereum node
+w3 = Web3(Web3.HTTPProvider(ethereum_node_url))
+
+# Create a Flashbots bundle provider
+bundle_provider = FlashbotsBundleProvider(
+    w3,
+    wallet_private_key,
+    flashbots_relay_url,
+    gas_price_strategy=gas_price,
+)
+
+# Build and sign your transactions
+transaction_1 = {
+    "to": target_address,
+    "value": w3.to_wei(1, "ether"),
+    "gas": 21000,
+    "gasPrice": gas_price,
+    "nonce": nonce,
+}
+
+transaction_1_signed = w3.eth.account.sign_transaction(transaction_1, private_key=wallet_private_key)
+
+# Create a bundle with your transactions
+bundle = [transaction_1_signed]
+
+# Send the bundle to Flashbots
+bundle_response = bundle_provider.send_bundle(bundle)
+
+print("Bundle submitted successfully!")
+print("Flashbots bundle response:", bundle_response)
